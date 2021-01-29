@@ -1,5 +1,4 @@
 import { React, Component } from 'react';
-import { parse } from 'url';
 import { Stage, Selection, Shape } from 'ngl';
 
 import { INTYPE_COLORS } from '../utils/ConstUtils';
@@ -13,7 +12,6 @@ class PharModView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: true,
             queryParams: null,
             stage: null,
             pdbURI: null,  // protein source
@@ -33,7 +31,9 @@ class PharModView extends Component {
     }
 
     componentDidUpdate = () => {
-        this.renderView()
+        if (this.state.pdb !== null && this.state.sdf !== null) {
+            this.renderView()
+        }
     }
 
     createElement = (name, properties, style, id) => {
@@ -71,7 +71,6 @@ class PharModView extends Component {
                     } else if (pdb_reader_index > 1) {
                         const phar_model_line = remark_line.split(/\s+/)
                         if (phar_model_line.length > 1) {
-                            // pharmo.push(phar_model_line)
                             pharmo.push(phar_model_line.slice(1, ).concat(phar_model_line[0]))
                         } else {
                             pdb_reader_index = 0
@@ -80,6 +79,7 @@ class PharModView extends Component {
                 }
             }
         })
+
         this.state.pharMods = pharmo
         this.setState({pdb: pdbblob})
     }
@@ -104,17 +104,12 @@ class PharModView extends Component {
             this.setState({sdfURI: qps['sdf']})
             this.fetchSDF(qps['sdf'])
         }
-
-        // change loading status when all args are fetched
-        if (this.state.sdf !== null && this.state.pdb !== null && this.state.loading) { 
-            this.setState({loading: false})
-        }
     }
 
     render() {
         return (
             <div style={{ height: '100vh' }}>
-                <div id="viewport" sytle={{ width: "100%", height: "100%", position: "relative" }} />
+                <div id="viewport" style={{ width: "100%", height: "100%", position: "relative" }} />
             </div>
         )
     }
@@ -145,14 +140,16 @@ class PharModView extends Component {
 
         // start rendering view
         setTimeout( () => {
-            if (!that.state.loading && that.state.stage !== null) {
-                console.log(that.state.pdb)
+            if (that.state.stage !== null && 
+                that.state.pdb !== null && 
+                that.state.sdf !== null) {
                 Promise.all([
                     that.state.stage.loadFile(that.state.pdb, {ext: 'pdb'}),
                     that.state.stage.loadFile(that.state.sdf, {ext: "sdf"})
                 ]).then(function(ol) {
                     // render protein
                     if (ol[0].structure.atomCount > 0) {
+                        console.log("rendering start", that.state.pdb)
                         that.state.stage.getRepresentationsByName("cartoon").dispose()
                         that.renderCartoonOnProtein(ol[0])
                         ol[0].autoView();
@@ -308,7 +305,7 @@ class PharModView extends Component {
             }
             this._renderScrollerView(ligands_component.structure.modelStore.count, 0, all_ligands_repr_map)
         } else {
-            ligands_component.addRepresentation("ball_stick")
+            ligands_component.addRepresentation("ball+stick")
         }
     }
 
