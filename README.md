@@ -14,8 +14,11 @@ It has these main features:
 # Step
 
 The `yarn` and `npm` are required, here is the list of the installation manual:
+
  - node >=v15.5.0 (includes npm >=7.4.0): https://nodejs.org/en/download/current/
  - yarn >=1.22.10: https://classic.yarnpkg.com/en/docs/install/#mac-stable
+
+After installation of `npm` and `yarn`, you can launch the demo through commands below:
 
 ```
 yarn
@@ -76,3 +79,11 @@ if ('type' in query_params) {
 ```
 
 Define the extended VIEW_TYPE for your own component.
+
+# Demo Screenshot
+
+### Homepage
+![Homepage](doc/screenshots/homepage.png)
+
+### Pharmacophore Model Viz
+![Pharmacophore Model Viz](doc/screenshots/pharmod-view.png)
