@@ -2,7 +2,7 @@ import { React, Component } from 'react';
 import { parse } from 'url';
 import { Stage, Selection, Shape } from 'ngl';
 
-import { INTYPE_COLORS } from '../utils/FileUtils';
+import { INTYPE_COLORS } from '../utils/ConstUtils';
 
 var cartoonRepr
 var prevRepr = 1;
@@ -14,7 +14,7 @@ class PharModView extends Component {
         super(props);
         this.state = {
             loading: true,
-            queryParams: '',
+            queryParams: null,
             stage: null,
             pdbURI: null,  // protein source
             sdfURI: null,  // ligands source
@@ -33,10 +33,7 @@ class PharModView extends Component {
     }
 
     componentDidUpdate = () => {
-        if (this.state.protein_raw !== null && 
-            this.state.ligands !== null) {
-            this.renderView()
-        }
+        this.renderView()
     }
 
     createElement = (name, properties, style, id) => {
@@ -83,7 +80,6 @@ class PharModView extends Component {
                 }
             }
         })
-
         this.state.pharMods = pharmo
         this.setState({pdb: pdbblob})
     }
@@ -97,21 +93,20 @@ class PharModView extends Component {
     }
 
     prepareArgs = () => {
-        const {query_params} = this.props;
-        const qps = parse(query_params, {parseQueryString: true}).query
+        const qps = this.props.queryParams;
 
-        if (this.state.pdb === null) {
+        if (this.state.pdbURI === null) {
             this.setState({pdbURI: qps['pdb']})
             this.fetchPDB(qps['pdb'])
         }
 
-        if (this.state.sdf === null) {
+        if (this.state.sdfURI === null) {
             this.setState({sdfURI: qps['sdf']})
             this.fetchSDF(qps['sdf'])
         }
 
         // change loading status when all args are fetched
-        if (this.state.sdf !== null && this.state.pdb !== null) {
+        if (this.state.sdf !== null && this.state.pdb !== null && this.state.loading) { 
             this.setState({loading: false})
         }
     }
@@ -151,6 +146,7 @@ class PharModView extends Component {
         // start rendering view
         setTimeout( () => {
             if (!that.state.loading && that.state.stage !== null) {
+                console.log(that.state.pdb)
                 Promise.all([
                     that.state.stage.loadFile(that.state.pdb, {ext: 'pdb'}),
                     that.state.stage.loadFile(that.state.sdf, {ext: "sdf"})
@@ -222,8 +218,8 @@ class PharModView extends Component {
     renderPharModViewOnProtein = (protein_component) => {
         const inter_groupby_type = {}
         const inter_groupby_lig = {}
-        if (this.state.phar_mods !== null) {
-            this.state.phar_mods.forEach(function(l) {
+        if (this.state.pharMods !== null) {
+            this.state.pharMods.forEach(function(l) {
                 const ligno = parseInt(l[7]) - 1
                 // const shapval = l[6]
                 const intype = l[5]

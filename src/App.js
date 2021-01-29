@@ -12,14 +12,14 @@ class App extends Component {
 
     render() {
         const query_params_str = window.location && window.location.search ? window.location.search : '';
-        const query_params_path = parse(query_params_str, {parseQueryString: true}).query
+        const query_params = parse(query_params_str, {parseQueryString: true}).query
         
-        console.log(query_params_path['type'] === undefined)
-        if ('type' in query_params_path) {
-            const view_type = query_params_path['type']
+        console.log(query_params['type'] === undefined)
+        if ('type' in query_params) {
+            const view_type = query_params['type']
             if (view_type) {
                 if (view_type.toLowerCase() === PharModView.VIEW_TYPE) {
-                    return <PharModView queryParams={query_params_path} />;
+                    return <PharModView queryParams={query_params} />;
                 }
             }
         }
